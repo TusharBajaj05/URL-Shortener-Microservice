@@ -78,7 +78,6 @@ app.post('/api/shorturl', bodyParser.urlencoded({extended: false}), (req, res) =
 
 app.get('/api/shorturl/:short_url', (req, res) => {
   let input = Number(req.params.short_url)
-  console.log(input)
   if(!isNaN(input)) {
   Url.findOne({short: input})
     .then(result => {
