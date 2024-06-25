@@ -15,9 +15,7 @@ app.get('/', function(req, res) {
 });
 
 // Your first API endpoint
-app.get('/api/hello', function(req, res) {
-  res.json({ greeting: 'hello API' });
-});
+
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
@@ -40,13 +38,16 @@ let urlSchema = new mongoose.Schema({
 let Url = mongoose.model('Url', urlSchema)
 
 let bodyParser = require('body-parser')
-let originalUrl
-let short
+let originalUrl=''
+let short = 0
+
 app.post('/api/shorturl', bodyParser.urlencoded({extended: false}), (req, res) => {
   originalUrl = req.body['url']
+  // console.log(originalUrl)
 
-  let regexUrl = new RegExp( /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi)
-  if(!originalUrl.match(regexUrl)) {
+  let regexUrl = new RegExp(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi)
+  let regexUrl1 = new RegExp(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g)
+  if(!originalUrl.includes("https://") && (!originalUrl.includes('http://'))) {
     res.json({error: 'Invalid Url'})
     return
   }
@@ -64,7 +65,8 @@ app.post('/api/shorturl', bodyParser.urlencoded({extended: false}), (req, res) =
           {new: true, upsert: true})
           .then((savedUrl) => {
             short = savedUrl.short
-            res.json({original_url: originalUrl, 'short_url': short})
+            // res.json({original_url:originalUrl,short_url:short})
+            res.json({ original_url : originalUrl, short_url : 1})
           })
           .catch(err => {
             console.log(err)
@@ -75,8 +77,9 @@ app.post('/api/shorturl', bodyParser.urlencoded({extended: false}), (req, res) =
     })
 })
 
-app.get('/api/shorturl/:input', (req, res) => {
-  let input = req.params.input
+app.get('/api/shorturl/:short_url', (req, res) => {
+  let input = Number(req.params.short_url)
+  if(!isNaN(input)) {
   Url.findOne({short: input})
     .then(result => {
       if(result != undefined) {
@@ -89,4 +92,8 @@ app.get('/api/shorturl/:input', (req, res) => {
     .catch(err => {
       console.log(err)
     })
+  }
+  else {
+    res.json('Please provide number')
+  }
 })
