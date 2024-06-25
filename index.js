@@ -65,8 +65,7 @@ app.post('/api/shorturl', bodyParser.urlencoded({extended: false}), (req, res) =
           {new: true, upsert: true})
           .then((savedUrl) => {
             short = savedUrl.short
-            // res.json({original_url:originalUrl,short_url:short})
-            res.json({ original_url : originalUrl, short_url : 1})
+            res.json({original_url:originalUrl,short_url:short})
           })
           .catch(err => {
             console.log(err)
@@ -79,6 +78,7 @@ app.post('/api/shorturl', bodyParser.urlencoded({extended: false}), (req, res) =
 
 app.get('/api/shorturl/:short_url', (req, res) => {
   let input = Number(req.params.short_url)
+  console.log(input)
   if(!isNaN(input)) {
   Url.findOne({short: input})
     .then(result => {
